@@ -278,9 +278,9 @@ const BackgroundAnimation = () => {
         ctx.restore();
       });
 
-      /* 旋涡星系 */
-      const gx = 0.25 * w;
-      const gy = 0.28 * h;
+      /* 旋涡星系（居中，与太阳同位） */
+      const gx = 0.5 * w;
+      const gy = 0.5 * h;
       const galR = 0.75 * Math.max(w, h);
       ctx.save();
       ctx.translate(gx, gy);
