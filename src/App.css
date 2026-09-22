@@ -1,20 +1,322 @@
+/* 深空登录页样式（从原始页面提取，去掉中间登录卡片和分析师语录） */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background: #050510;
+  background: #050a14;
 }
 
-.app-root {
-  position: relative;
+.login-page {
   width: 100vw;
   height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #050a14;
   overflow: hidden;
-  cursor: crosshair;
+  position: relative;
+}
+
+.login-page:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 50%, rgba(88, 166, 255, 0.03) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 25% 40%, rgba(136, 46, 224, 0.03) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 75% 60%, rgba(35, 213, 171, 0.02) 0%, transparent 60%);
+  z-index: 0;
+}
+
+/* ==================== 旋转光环 ==================== */
+
+.login-page .ring-wrapper {
+  --ring-size: 85vmin;
+  position: relative;
+  z-index: 1;
+  width: var(--ring-size);
+  height: var(--ring-size);
+  animation: ringGrow 1s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.login-page .ring-wrapper .ring-visual {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.login-page .ring-wrapper .ring-svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ==================== 轨道功能卡片 ==================== */
+
+.login-page .ring-wrapper .feature-cards-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.login-page .ring-wrapper .feature-cards-layer .feature-card-ring {
+  --card-color: #58a6ff;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--ring-size) * 0.0022);
+  width: calc(var(--ring-size) * 0.0578);
+  height: calc(var(--ring-size) * 0.0578);
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #ffffff14, #161b22e6 60%);
+  border: calc(var(--ring-size) * 0.0022) solid var(--card-color);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--card-color) 30%, transparent),
+    inset 0 0 12px color-mix(in srgb, var(--card-color) 12%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  pointer-events: auto;
+  cursor: default;
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.login-page .ring-wrapper .feature-cards-layer .feature-card-ring:hover {
+  border-color: var(--card-color);
+  box-shadow: 0 0 32px color-mix(in srgb, var(--card-color) 50%, transparent),
+    inset 0 0 20px color-mix(in srgb, var(--card-color) 20%, transparent);
+}
+
+.login-page .ring-wrapper .feature-cards-layer .feature-card-ring .feature-card-icon {
+  font-size: calc(var(--ring-size) * 0.02);
+  color: var(--card-color);
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-page .ring-wrapper .feature-cards-layer .feature-card-ring .feature-card-label {
+  font-size: calc(var(--ring-size) * 0.01);
+  font-weight: 600;
+  color: #e6edf3cc;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+/* ==================== 深空背景 ==================== */
+
+.login-page .background-animation {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.login-page .background-animation .star-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: auto;
+}
+
+.login-page .background-animation .deep-space-gradient {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 120% 80% at 50% 100%, rgba(10, 20, 50, 0.6) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 60% at 50% 0%, rgba(20, 10, 40, 0.4) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.login-page .background-animation .milky-way {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 0%,
+    transparent 30%,
+    rgba(88, 166, 255, 0.012) 35%,
+    rgba(136, 46, 224, 0.018) 40%,
+    rgba(35, 213, 171, 0.012) 45%,
+    rgba(88, 166, 255, 0.015) 50%,
+    rgba(136, 46, 224, 0.01) 55%,
+    transparent 60%,
+    transparent 100%
+  );
+  filter: blur(30px);
+  pointer-events: none;
+  animation: milkyWayShift 60s ease-in-out infinite alternate;
+}
+
+/* ==================== 行星提示框 ==================== */
+
+.login-page .background-animation .planet-tooltip {
+  position: absolute;
+  background: rgba(8, 20, 40, 0.9);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(88, 166, 255, 0.3);
+  border-radius: 12px;
+  padding: 12px 16px;
+  max-width: 260px;
+  pointer-events: none;
+  transform: translate(15px, -50%);
+  z-index: 200;
+  box-shadow: 0 4px 24px rgba(88, 166, 255, 0.15);
+  animation: planetTooltipIn 0.3s ease-out;
+}
+
+.login-page .background-animation .planet-tooltip:after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  border-top: 6px solid transparent;
+  border-bottom: 6px solid transparent;
+  border-right: 6px solid rgba(88, 166, 255, 0.3);
+}
+
+.login-page .background-animation .planet-tooltip .planet-tooltip-name {
+  color: #58a6ff;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.5);
+}
+
+.login-page .background-animation .planet-tooltip .planet-tooltip-text {
+  color: #e6edf3;
+  font-size: 12px;
+  line-height: 1.6;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+}
+
+/* ==================== UFO 对话框 ==================== */
+
+.login-page .background-animation .ufo-dialogue {
+  position: absolute;
+  background: #081428d9;
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(88, 166, 255, 0.4);
+  border-radius: 12px;
+  padding: 10px 16px;
+  color: #a0d8ff;
+  font-size: 13px;
+  font-weight: 500;
+  max-width: 280px;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  margin-top: -10px;
+  z-index: 200;
+  text-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
+  box-shadow: 0 4px 24px #58a6ff26;
+  transition: opacity 0.5s ease;
+  white-space: nowrap;
+}
+
+.login-page .background-animation .ufo-dialogue:after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translate(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(88, 166, 255, 0.4);
+}
+
+/* ==================== 动画 ==================== */
+
+@keyframes ringGrow {
+  0% {
+    transform: scale(0.25);
+    opacity: 0;
+  }
+  55% {
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes milkyWayShift {
+  0% {
+    transform: translate(-5%) rotate(-2deg);
+  }
+  to {
+    transform: translate(5%) rotate(2deg);
+  }
+}
+
+@keyframes planetTooltipIn {
+  from {
+    opacity: 0;
+    transform: translate(10px, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(15px, -50%) scale(1);
+  }
+}
+
+@keyframes blink-cursor {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  to {
+    opacity: 0;
+  }
+}
+
+/* ==================== 兼容与降级 ==================== */
+
+@supports not (backdrop-filter: blur(30px)) {
+  .login-page .feature-card-ring {
+    background: #0d1117f0 !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-page .ring-visual {
+    animation: none !important;
+  }
+  .login-page .ring-track {
+    transition: none !important;
+  }
+  .login-page .milky-way {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-page {
+    overflow-y: auto;
+    padding: 16px 0;
+    align-items: flex-start;
+  }
 }

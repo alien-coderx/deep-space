@@ -1,10 +1,11 @@
-import React from 'react';
-import DeepSpaceBackground from './components/DeepSpaceBackground.jsx';
+import BackgroundAnimation from './components/BackgroundAnimation.jsx';
+import RingVisual from './components/RingVisual.jsx';
 
 export default function App() {
   return (
-    <div className="app-root">
-      <DeepSpaceBackground />
+    <div className="login-page">
+      <BackgroundAnimation />
+      <RingVisual />
     </div>
   );
 }
