@@ -19,6 +19,7 @@ const BackgroundAnimation = () => {
   const dialogueTimerRef = useRef(null);
   const aliensRef = useRef([]);
   const meteorsRef = useRef([]);
+  const starsRef = useRef([]);
 
   const { farStars, midStars, nearStars, nebulae, spiralParticles, planets } = useMemo(() => {
     const rand = (a, b) => Math.random() * (b - a) + a;
@@ -143,6 +144,14 @@ const BackgroundAnimation = () => {
       if (Math.sqrt((px - ux) ** 2 + (py - uy) ** 2) < 45) {
         return { type: 'ufo', index: 0, name: '' };
       }
+      /* 已生成的外星人（可点击推动） */
+      const spawned = aliensRef.current;
+      for (let i = 0; i < spawned.length; i++) {
+        const sa = spawned[i];
+        if (!sa.merging && !sa.becomingStar && Math.sqrt((px - sa.x) ** 2 + (py - sa.y) ** 2) < 40) {
+          return { type: 'spawned-alien', index: i, name: '' };
+        }
+      }
       const alienX = 0.82 * w;
       const alienY = 0.18 * h + 8 * Math.sin(0.8 * time);
       if (Math.sqrt((px - alienX) ** 2 + (py - alienY) ** 2) < 50) {
@@ -194,6 +203,22 @@ const BackgroundAnimation = () => {
       if (hit.type === 'planet') {
         const text = PLANET_TEXTS[hit.name];
         if (text) setTooltip({ name: hit.name, text, x: e.clientX, y: e.clientY, visible: true });
+      } else if (hit.type === 'spawned-alien') {
+        /* 点击外星人：50% 闪一下变成星星 / 50% 原地自旋飞向别处（太空惯性滑行） */
+        const sa = aliensRef.current[hit.index];
+        if (sa && !sa.merging && !sa.becomingStar) {
+          if (Math.random() < 0.5) {
+            sa.becomingStar = true;
+            sa.starFlash = 0;
+          } else {
+            sa.pushed = true;
+            const ang = Math.random() * TAU;
+            const speed = 8 + 7 * Math.random();
+            sa.pushVX = Math.cos(ang) * speed;
+            sa.pushVY = Math.sin(ang) * speed;
+            sa.pushRotSpeed = (Math.random() < 0.5 ? -1 : 1) * (0.3 + 0.25 * Math.random());
+          }
+        }
       } else if (hit.type === 'ufo') {
         const ufo = ufoRef.current;
         if (ufo.state === 'idle') {
@@ -206,6 +231,8 @@ const BackgroundAnimation = () => {
           /* 点击 UFO：所有已生成的外星人飞回常驻外星人处合体 */
           aliensRef.current.forEach((a) => {
             a.merging = true;
+            a.pushed = false;
+            a.becomingStar = false;
             a.targetX = 0.82 * w;
             a.targetY = 0.18 * h;
           });
@@ -219,8 +246,8 @@ const BackgroundAnimation = () => {
           aliens.push({
             x: 0.82 * w,
             y: 0.18 * h,
-            targetX: Math.random() * w * 0.8 + 0.1 * w,
-            targetY: Math.random() * h * 0.6 + 0.1 * h,
+            targetX: Math.random() * w * 0.94 + 0.03 * w,
+            targetY: Math.random() * h * 0.9 + 0.05 * h,
             variantIndex: variant,
             action: ALIEN_ACTIONS[Math.floor(Math.random() * ALIEN_ACTIONS.length)],
             createdAt: performance.now(),
@@ -487,6 +514,23 @@ const BackgroundAnimation = () => {
         }
       });
 
+      /* 外星人变成的星星（点击触发，永久留在星空中） */
+      starsRef.current.forEach((s) => {
+        const tw = 0.5 + 0.5 * Math.sin(t * s.twinkleSpeed + s.twinkleOffset);
+        const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.glowR);
+        g.addColorStop(0, `rgba(${s.color}, ${0.4 * s.brightness * tw})`);
+        g.addColorStop(0.3, `rgba(${s.color}, ${0.15 * s.brightness * tw})`);
+        g.addColorStop(1, `rgba(${s.color}, 0)`);
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.glowR, 0, TAU);
+        ctx.fill();
+        ctx.fillStyle = `rgba(255, 255, 255, ${s.brightness * tw})`;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.r, 0, TAU);
+        ctx.fill();
+      });
+
       /* 常驻外星人 */
       const alienX = 0.82 * w;
       const alienY = 0.18 * h + 8 * Math.sin(0.8 * t);
@@ -495,11 +539,74 @@ const BackgroundAnimation = () => {
         drawAlien(ctx, alienX, alienY, t, alienAlpha, residentVariantRef.current);
       }
 
-      /* 点击生成的外星人（上限 50，点击 UFO 时飞回常驻外星人处合体） */
+      /* 点击生成的外星人（上限 50，散布整个空间；点击 UFO 时飞回常驻外星人处合体） */
       const now = performance.now();
       const aliens = aliensRef.current;
       for (let i = aliens.length - 1; i >= 0; i--) {
         const a = aliens[i];
+        /* 闪一下变成星星 */
+        if (a.becomingStar) {
+          a.starFlash += 0.05;
+          if (a.starFlash >= 1) {
+            const roll = Math.random();
+            let starColor;
+            if (roll < 0.3) starColor = '88, 166, 255';
+            else if (roll < 0.55) starColor = '136, 46, 224';
+            else if (roll < 0.8) starColor = '35, 213, 171';
+            else starColor = '255, 200, 100';
+            starsRef.current.push({
+              x: a.x,
+              y: a.y,
+              r: 1.5 + 1.5 * Math.random(),
+              brightness: 0.7 + 0.3 * Math.random(),
+              twinkleSpeed: 0.3 + 1.2 * Math.random(),
+              twinkleOffset: Math.random() * TAU,
+              glowR: 10 + 12 * Math.random(),
+              color: starColor
+            });
+            aliens.splice(i, 1);
+            continue;
+          }
+          const flashR = 20 + 90 * Math.sin(a.starFlash * Math.PI);
+          const flashGrad = ctx.createRadialGradient(a.x, a.y, 0, a.x, a.y, flashR);
+          flashGrad.addColorStop(0, `rgba(255, 255, 255, ${0.85 * (1 - 0.4 * a.starFlash)})`);
+          flashGrad.addColorStop(0.4, `rgba(200, 220, 255, ${0.45 * (1 - a.starFlash)})`);
+          flashGrad.addColorStop(1, 'rgba(200, 220, 255, 0)');
+          ctx.fillStyle = flashGrad;
+          ctx.beginPath();
+          ctx.arc(a.x, a.y, flashR, 0, TAU);
+          ctx.fill();
+          drawAlien(ctx, a.x, a.y, t, alienAlpha * (1 - a.starFlash) * a.scale, a.variantIndex, a.scale * (1 + 0.4 * a.starFlash), a.action, a.actionPhase);
+          continue;
+        }
+        /* 被推一下：自旋着惯性滑行到别处（宇航员太空漂移） */
+        if (a.pushed) {
+          a.x += a.pushVX;
+          a.y += a.pushVY;
+          a.pushVX *= 0.992;
+          a.pushVY *= 0.992;
+          if (a.x < 20) {
+            a.x = 20;
+            a.pushVX = Math.abs(a.pushVX);
+          } else if (a.x > w - 20) {
+            a.x = w - 20;
+            a.pushVX = -Math.abs(a.pushVX);
+          }
+          if (a.y < 20) {
+            a.y = 20;
+            a.pushVY = Math.abs(a.pushVY);
+          } else if (a.y > h - 20) {
+            a.y = h - 20;
+            a.pushVY = -Math.abs(a.pushVY);
+          }
+          if (Math.hypot(a.pushVX, a.pushVY) < 0.4) {
+            a.pushed = false;
+            a.targetX = Math.random() * w * 0.94 + 0.03 * w;
+            a.targetY = Math.random() * h * 0.9 + 0.05 * h;
+          }
+          drawAlien(ctx, a.x, a.y, t, alienAlpha * a.scale, a.variantIndex, a.scale, 'spin', a.actionPhase);
+          continue;
+        }
         if (a.merging) {
           a.mergeProgress = Math.min(1, a.mergeProgress + 0.02);
           a.scale = 1 - 0.8 * a.mergeProgress;
@@ -513,8 +620,8 @@ const BackgroundAnimation = () => {
           a.x += 0.01 * (a.targetX - a.x);
           a.y += 0.01 * (a.targetY - a.y);
           if (Math.abs(a.x - a.targetX) < 10 && Math.abs(a.y - a.targetY) < 10) {
-            a.targetX = Math.random() * w * 0.8 + 0.1 * w;
-            a.targetY = Math.random() * h * 0.6 + 0.1 * h;
+            a.targetX = Math.random() * w * 0.94 + 0.03 * w;
+            a.targetY = Math.random() * h * 0.9 + 0.05 * h;
           }
         }
         drawAlien(ctx, a.x, a.y, t, alienAlpha * a.scale, a.variantIndex, a.scale, a.action, a.actionPhase);
