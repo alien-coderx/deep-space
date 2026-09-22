@@ -681,7 +681,7 @@ const DeepSpaceBackground = () => {
     /* ============ 主循环 ============ */
     let aliens = [];
     let ships = [];
-    const MAX_ALIENS = 30;
+    const MAX_ALIENS = 50;
 
     const spawnAlien = (x, y) => {
       if (aliens.length >= MAX_ALIENS) return;
