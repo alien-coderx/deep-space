@@ -118,8 +118,8 @@ const BackgroundAnimation = () => {
 
   const hitTest = useCallback(
     (px, py, time, w, h) => {
-      const sunX = 0.22 * w;
-      const sunY = 0.25 * h;
+      const sunX = 0.5 * w;
+      const sunY = 0.5 * h;
       const solarR = 0.42 * Math.min(w, h);
       const sunSize = 0.028 * Math.min(w, h);
       if (Math.sqrt((px - sunX) ** 2 + (py - sunY) ** 2) < 2 * sunSize) {
@@ -203,6 +203,12 @@ const BackgroundAnimation = () => {
           ufo.y = 0.78 * h + 8 * Math.cos(0.5 * time);
           ufo.trail = [];
           ufo.alienPickedUp = false;
+          /* 点击 UFO：所有已生成的外星人飞回常驻外星人处合体 */
+          aliensRef.current.forEach((a) => {
+            a.merging = true;
+            a.targetX = 0.82 * w;
+            a.targetY = 0.18 * h;
+          });
         }
       } else if (hit.type === 'alien') {
         if (!residentVisibleRef.current) return;
@@ -308,8 +314,8 @@ const BackgroundAnimation = () => {
       ctx.restore();
 
       /* 恒星层（受太阳系位置压暗） */
-      const sunX = 0.22 * w;
-      const sunY = 0.25 * h;
+      const sunX = 0.5 * w;
+      const sunY = 0.5 * h;
       const dimR = 0.65 * Math.max(w, h);
       farStars.forEach((s) => {
         const tw = 0.5 + 0.5 * Math.sin(t * s.twinkleSpeed + s.twinkleOffset);
@@ -489,16 +495,11 @@ const BackgroundAnimation = () => {
         drawAlien(ctx, alienX, alienY, t, alienAlpha, residentVariantRef.current);
       }
 
-      /* 点击生成的外星人（上限 50，5 秒后飞回常驻外星人处合体） */
+      /* 点击生成的外星人（上限 50，点击 UFO 时飞回常驻外星人处合体） */
       const now = performance.now();
       const aliens = aliensRef.current;
       for (let i = aliens.length - 1; i >= 0; i--) {
         const a = aliens[i];
-        if ((now - a.createdAt) / 1000 > 5 && !a.merging) {
-          a.merging = true;
-          a.targetX = alienX;
-          a.targetY = alienY;
-        }
         if (a.merging) {
           a.mergeProgress = Math.min(1, a.mergeProgress + 0.02);
           a.scale = 1 - 0.8 * a.mergeProgress;

@@ -1,4 +1,4 @@
-/* 深空登录页样式（从原始页面提取，去掉中间登录卡片和分析师语录） */
+/* 深空页面样式（无中间光环，太阳系居中） */
 
 * {
   margin: 0;
@@ -34,92 +34,6 @@ body,
     radial-gradient(ellipse 60% 50% at 25% 40%, rgba(136, 46, 224, 0.03) 0%, transparent 60%),
     radial-gradient(ellipse 60% 50% at 75% 60%, rgba(35, 213, 171, 0.02) 0%, transparent 60%);
   z-index: 0;
-}
-
-/* ==================== 旋转光环 ==================== */
-
-.login-page .ring-wrapper {
-  --ring-size: 85vmin;
-  position: relative;
-  z-index: 1;
-  width: var(--ring-size);
-  height: var(--ring-size);
-  animation: ringGrow 1s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-}
-
-.login-page .ring-wrapper .ring-visual {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 1;
-}
-
-.login-page .ring-wrapper .ring-svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-
-/* ==================== 轨道功能卡片 ==================== */
-
-.login-page .ring-wrapper .feature-cards-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 2;
-}
-
-.login-page .ring-wrapper .feature-cards-layer .feature-card-ring {
-  --card-color: #58a6ff;
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: calc(var(--ring-size) * 0.0022);
-  width: calc(var(--ring-size) * 0.0578);
-  height: calc(var(--ring-size) * 0.0578);
-  border-radius: 50%;
-  background: radial-gradient(circle at 40% 35%, #ffffff14, #161b22e6 60%);
-  border: calc(var(--ring-size) * 0.0022) solid var(--card-color);
-  box-shadow: 0 0 20px color-mix(in srgb, var(--card-color) 30%, transparent),
-    inset 0 0 12px color-mix(in srgb, var(--card-color) 12%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  pointer-events: auto;
-  cursor: default;
-  transition: box-shadow 0.3s ease, border-color 0.3s ease;
-}
-
-.login-page .ring-wrapper .feature-cards-layer .feature-card-ring:hover {
-  border-color: var(--card-color);
-  box-shadow: 0 0 32px color-mix(in srgb, var(--card-color) 50%, transparent),
-    inset 0 0 20px color-mix(in srgb, var(--card-color) 20%, transparent);
-}
-
-.login-page .ring-wrapper .feature-cards-layer .feature-card-ring .feature-card-icon {
-  font-size: calc(var(--ring-size) * 0.02);
-  color: var(--card-color);
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.login-page .ring-wrapper .feature-cards-layer .feature-card-ring .feature-card-label {
-  font-size: calc(var(--ring-size) * 0.01);
-  font-weight: 600;
-  color: #e6edf3cc;
-  white-space: nowrap;
-  letter-spacing: 0.5px;
 }
 
 /* ==================== 深空背景 ==================== */
@@ -248,20 +162,6 @@ body,
 
 /* ==================== 动画 ==================== */
 
-@keyframes ringGrow {
-  0% {
-    transform: scale(0.25);
-    opacity: 0;
-  }
-  55% {
-    opacity: 1;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
-
 @keyframes milkyWayShift {
   0% {
     transform: translate(-5%) rotate(-2deg);
@@ -282,32 +182,9 @@ body,
   }
 }
 
-@keyframes blink-cursor {
-  0%,
-  49% {
-    opacity: 1;
-  }
-  50%,
-  to {
-    opacity: 0;
-  }
-}
-
 /* ==================== 兼容与降级 ==================== */
 
-@supports not (backdrop-filter: blur(30px)) {
-  .login-page .feature-card-ring {
-    background: #0d1117f0 !important;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
-  .login-page .ring-visual {
-    animation: none !important;
-  }
-  .login-page .ring-track {
-    transition: none !important;
-  }
   .login-page .milky-way {
     animation: none !important;
   }
